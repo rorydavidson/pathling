@@ -1,0 +1,161 @@
+### Import Data into docker container
+POST /fhir/$import HTTP/1.1
+Host: localhost:8088
+Content-Type: application/json
+Accept-Encoding: gzip
+
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "source",
+      "part": [
+        {
+          "name": "resourceType",
+          "valueCode": "Condition"
+        },
+        {
+          "name": "url",
+          "valueUrl": "file:///usr/share/staging/Condition.ndjson"
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {
+          "name": "resourceType",
+          "valueCode": "Encounter"
+        },
+        {
+          "name": "url",
+          "valueUrl": "file:///usr/share/staging/Encounter.ndjson"
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {
+          "name": "resourceType",
+          "valueCode": "Observation"
+        },
+        {
+          "name": "url",
+          "valueUrl": "file:///usr/share/staging/Observation.ndjson"
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {
+          "name": "resourceType",
+          "valueCode": "Patient"
+        },
+        {
+          "name": "url",
+          "valueUrl": "file:///usr/share/staging/Patient.ndjson"
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "part": [
+        {
+          "name": "resourceType",
+          "valueCode": "Procedure"
+        },
+        {
+          "name": "url",
+          "valueUrl": "file:///usr/share/staging/Procedure.ndjson"
+        }
+      ]
+    }
+  ]
+}
+
+
+### Aggregate number of male/female patients
+POST /fhir/$aggregate HTTP/1.1
+Host: localhost:8088
+Content-Type: application/json
+Accept-Encoding: gzip
+
+{
+    "resourceType": "Parameters",
+    "parameter": [
+    	{
+    		"name": "subjectResource",
+    		"valueCode": "Patient"
+    	},
+        {
+            "name": "aggregation",
+            "part": [
+                {
+                    "name": "label",
+                    "valueString": "Number of patients"
+                },
+                {
+                    "name": "expression",
+                    "valueString": "count()"
+                }
+            ]
+        },
+        {
+            "name": "grouping",
+            "part": [
+                {
+                    "name": "label",
+                    "valueString": "Gender"
+                },
+                {
+                    "name": "expression",
+                    "valueString": "gender"
+                }
+            ]
+        }
+    ]
+}
+
+### ECL example
+POST /fhir/$aggregate HTTP/1.1
+Host: localhost:8088
+Content-Type: application/json
+Accept-Encoding: gzip
+
+{
+    "resourceType": "Parameters",
+    "parameter": [
+    	{
+    		"name": "subjectResource",
+    		"valueCode": "Patient"
+    	},
+        {
+            "name": "aggregation",
+            "part": [
+                {
+                    "name": "label",
+                    "valueString": "Number of patients"
+                },
+                {
+                    "name": "expression",
+                    "valueString": "count()"
+                }
+            ]
+        },
+        {
+            "name": "grouping",
+            "part": [
+                {
+                    "name": "label",
+                    "valueString": "Got lung infection?"
+                },
+                {
+                    "name": "expression",
+                    "valueString": "reverseResolve(Condition.subject).code.memberOf('http://snomed.info/sct?fhir_vs=ecl/<64572001)')"
+                }
+            ]
+        }
+    ]
+}

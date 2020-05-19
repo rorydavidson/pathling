@@ -1,0 +1,17 @@
+version: "3"
+services:
+  pathling:
+    image: aehrc/pathling:1.0.0
+    ports:
+      - 8088:8080
+    environment:
+      PATHLING_EXECUTOR_MEMORY: 6g
+      PATHLING_CORS_ALLOWED_ORIGINS: http://localhost:3000
+#      PATHLING_TERMINOLOGY_SERVER_URL: http://localhost:8080/fhir
+      PATHLING_VERBOSE_REQUEST_LOGGING : 'true'
+    volumes:
+      - pathling:/usr/share/warehouse
+      - /Users/rory/data:/usr/share/staging
+volumes:
+  pathling:
+    driver: local
