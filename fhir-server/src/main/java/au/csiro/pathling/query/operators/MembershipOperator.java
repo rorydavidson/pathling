@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.Enumerations.FHIRDefinedType;
  * An expression that tests whether a singular value is present within a collection.
  *
  * @author John Grimes
- * @see <a href="https://pathling.app/docs/fhirpath/operators.html#membership">Membership</a>
+ * @see <a href="https://pathling.csiro.au/docs/fhirpath/operators.html#membership">Membership</a>
  */
 public class MembershipOperator implements BinaryOperator {
 
@@ -72,13 +72,16 @@ public class MembershipOperator implements BinaryOperator {
     Column collectionIdColumn = collection.getIdColumn();
     Column collectionColumn = collection.getValueColumn();
     Column elementColumn =
-        element.isLiteral() ? sqlHelper.getLiteralColumn(element)
-            : element.getValueColumn();
+        element.isLiteral()
+        ? sqlHelper.getLiteralColumn(element)
+        : element.getValueColumn();
     Column elementIdColumn = element.getIdColumn();
 
-    Dataset<Row> membershipDataset = element.isLiteral() ? collectionDataset
-        : collectionDataset.join(elementDataset, collectionIdColumn.equalTo(elementIdColumn),
-            "left_outer");
+    Dataset<Row> membershipDataset = element.isLiteral()
+                                     ? collectionDataset
+                                     : collectionDataset.join(elementDataset,
+                                         collectionIdColumn.equalTo(elementIdColumn),
+                                         "left_outer");
 
     // If the left-hand side of the operator (element) is empty, the result is empty. If the
     // right-hand side (collection) is empty, the result is false. Otherwise, a Boolean is returned
@@ -91,12 +94,25 @@ public class MembershipOperator implements BinaryOperator {
     // values, aggregated by the resource ID.
     // Aliasing of equality column here is necessary as otherwise it cannot be resolved in the
     // aggregation.
+    membershipDataset = membershipDataset.withColumn("equality", equalityColumn);
+
+    // If the operator is being executed within a `$this` context, we need to preserve the input 
+    // value column when we do the aggregation.
+    ParsedExpression thisContext = input.getContext().getThisContext();
+    Column[] groupBy;
+    int selectionStart;
+    if (thisContext == null) {
+      groupBy = new Column[]{collectionIdColumn};
+      selectionStart = 0;
+    } else {
+      groupBy = new Column[]{thisContext.getValueColumn(), collectionIdColumn};
+      selectionStart = 1;
+    }
+
     membershipDataset =
-        membershipDataset.select(collectionIdColumn, equalityColumn.alias("equality"));
-    membershipDataset =
-        membershipDataset.groupBy(collectionIdColumn).agg(max(membershipDataset.col("equality")));
-    Column idColumn = membershipDataset.col(membershipDataset.columns()[0]);
-    Column valueColumn = membershipDataset.col(membershipDataset.columns()[1]);
+        membershipDataset.groupBy(groupBy).agg(max(membershipDataset.col("equality")));
+    Column idColumn = membershipDataset.col(membershipDataset.columns()[selectionStart]);
+    Column valueColumn = membershipDataset.col(membershipDataset.columns()[selectionStart + 1]);
 
     // Construct a new parse result.
     ParsedExpression result = new ParsedExpression();

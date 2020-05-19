@@ -5,23 +5,21 @@
   ~ Software Licence Agreement.
   -->
 
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>au.csiro.pathling</groupId>
     <artifactId>pathling</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.2</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>fhir-server</artifactId>
   <packaging>jar</packaging>
 
   <properties>
-    <jettyVersion>9.4.27.v20200227</jettyVersion>
-    <antlrVersion>4.7.2</antlrVersion>
+    <jettyVersion>9.4.28.v20200408</jettyVersion>
+    <antlrVersion>4.8-1</antlrVersion>
     <fhirServerDockerRepo>aehrc/pathling</fhirServerDockerRepo>
   </properties>
 
@@ -66,11 +64,7 @@
     <!-- Encoders -->
     <dependency>
       <groupId>au.csiro.pathling</groupId>
-      <artifactId>encoders-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>au.csiro.pathling</groupId>
-      <artifactId>encoders-r4</artifactId>
+      <artifactId>encoders</artifactId>
     </dependency>
 
     <!-- Logging -->
@@ -87,12 +81,12 @@
     <dependency>
       <groupId>com.auth0</groupId>
       <artifactId>java-jwt</artifactId>
-      <version>3.9.0</version>
+      <version>3.10.2</version>
     </dependency>
     <dependency>
       <groupId>com.auth0</groupId>
       <artifactId>jwks-rsa</artifactId>
-      <version>0.10.0</version>
+      <version>0.11.0</version>
     </dependency>
 
     <!-- ANTLR -->
@@ -124,7 +118,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
-      <version>5.0.8.RELEASE</version>
+      <version>5.2.5.RELEASE</version>
     </dependency>
 
     <!-- Testing -->
@@ -147,6 +141,10 @@
     <dependency>
       <groupId>com.github.docker-java</groupId>
       <artifactId>docker-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.docker-java</groupId>
+      <artifactId>docker-java-transport-okhttp</artifactId>
     </dependency>
   </dependencies>
 
@@ -184,22 +182,74 @@
         <artifactId>dockerfile-maven-plugin</artifactId>
         <executions>
           <execution>
+            <id>build</id>
             <goals>
               <goal>build</goal>
+            </goals>
+            <configuration>
+              <tag>${project.version}</tag>
+              <buildArgs>
+                <VERSION>${project.version}</VERSION>
+                <HADOOP_MIRROR>${hadoopMirror}</HADOOP_MIRROR>
+                <HADOOP_VERSION>${hadoopVersion}</HADOOP_VERSION>
+                <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                <DEPENDENCY_PATH>target/dependency</DEPENDENCY_PATH>
+              </buildArgs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>tag-major</id>
+            <phase>none</phase>
+            <goals>
+              <goal>tag</goal>
+            </goals>
+            <configuration>
+              <tag>${project.majorVersion}</tag>
+            </configuration>
+          </execution>
+          <execution>
+            <id>tag-latest</id>
+            <phase>none</phase>
+            <goals>
+              <goal>tag</goal>
+            </goals>
+            <configuration>
+              <tag>latest</tag>
+            </configuration>
+          </execution>
+          <execution>
+            <id>push-version</id>
+            <phase>none</phase>
+            <goals>
               <goal>push</goal>
             </goals>
+            <configuration>
+              <tag>${project.version}</tag>
+            </configuration>
+          </execution>
+          <execution>
+            <id>push-major</id>
+            <phase>none</phase>
+            <goals>
+              <goal>push</goal>
+            </goals>
+            <configuration>
+              <tag>${project.majorVersion}</tag>
+            </configuration>
+          </execution>
+          <execution>
+            <id>push-latest</id>
+            <phase>none</phase>
+            <goals>
+              <goal>push</goal>
+            </goals>
+            <configuration>
+              <tag>latest</tag>
+            </configuration>
           </execution>
         </executions>
         <configuration>
           <repository>${fhirServerDockerRepo}</repository>
-          <tag>${project.version}</tag>
-          <buildArgs>
-            <VERSION>${project.version}</VERSION>
-            <HADOOP_MIRROR>${hadoopMirror}</HADOOP_MIRROR>
-            <HADOOP_VERSION>${hadoopVersion}</HADOOP_VERSION>
-            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
-            <DEPENDENCY_PATH>target/dependency</DEPENDENCY_PATH>
-          </buildArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -258,8 +308,7 @@
             </executions>
             <configuration>
               <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>au.csiro.pathling.FhirServerContainer</mainClass>
                 </transformer>
               </transformers>

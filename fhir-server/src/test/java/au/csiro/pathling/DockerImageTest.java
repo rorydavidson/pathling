@@ -21,6 +21,7 @@ import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.okhttp.OkHttpDockerCmdExecFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +56,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author John Grimes
  */
-@SuppressWarnings({"ResultOfMethodCallIgnored", "OptionalGetWithoutIsPresent"})
 @Category(au.csiro.pathling.SystemTest.class)
 public class DockerImageTest {
 
@@ -77,9 +77,13 @@ public class DockerImageTest {
   public DockerImageTest() {
     DockerClientConfig dockerClientConfig = DefaultDockerClientConfig.createDefaultConfigBuilder()
         .build();
-    dockerClient = DockerClientBuilder.getInstance(dockerClientConfig).build();
+    dockerClient = DockerClientBuilder.getInstance(dockerClientConfig)
+        .withDockerCmdExecFactory(new OkHttpDockerCmdExecFactory())
+        .build();
     httpClient = HttpClients.createDefault();
     jsonParser = FhirContext.forR4().newJsonParser();
+    logger.info("Created DockerImageTest: version=" + VERSION + ", terminologyServiceUrl="
+        + TERMINOLOGY_SERVICE_URL + ", dockerRepository=" + DOCKER_REPOSITORY);
   }
 
   private static File[] getResourceFolderFiles(String folder) {
@@ -158,7 +162,9 @@ public class DockerImageTest {
     } catch (Exception e) {
       stopContainer(dockerClient, fhirServerContainerId);
       fhirServerContainerId = null;
-      Runtime.getRuntime().removeShutdownHook(shutdownHook);
+      if (shutdownHook != null) {
+        Runtime.getRuntime().removeShutdownHook(shutdownHook);
+      }
       throw e;
     }
   }
@@ -245,7 +251,6 @@ public class DockerImageTest {
       queryRequest.addHeader("Content-Type", "application/fhir+json");
       queryRequest.addHeader("Accept", "application/fhir+json");
 
-      Parameters outParams = null;
       logger.info("Sending query request");
       try (CloseableHttpResponse response = (CloseableHttpResponse) httpClient
           .execute(queryRequest)) {

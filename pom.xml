@@ -5,9 +5,7 @@
   ~ Software Licence Agreement.
   -->
 
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>au.csiro.pathling</groupId>
@@ -21,10 +19,12 @@
     <developer>
       <name>John Grimes</name>
       <email>John.Grimes@csiro.au</email>
+      <url>https://github.com/johngrimes</url>
     </developer>
     <developer>
       <name>Piotr Szul</name>
       <email>Piotr.Szul@data61.csiro.au</email>
+      <url>https://github.com/piotrszul</url>
     </developer>
   </developers>
   <licenses>
@@ -34,12 +34,14 @@
     </license>
   </licenses>
 
-  <version>1.0.2</version>
+  <version>1.1.2</version>
 
   <properties>
-    <hapiFhirVersion>4.0.3</hapiFhirVersion>
-    <sparkVersion>2.4.4</sparkVersion>
+    <project.majorVersion>1</project.majorVersion>
+    <hapiFhirVersion>4.2.0</hapiFhirVersion>
+    <sparkVersion>2.4.5</sparkVersion>
     <sparkScalaVersion>2.11</sparkScalaVersion>
+    <dockerJavaVersion>3.2.1</dockerJavaVersion>
     <hadoopVersion>2.7.7</hadoopVersion>
     <hadoopMirror>https://mirror.aarnet.edu.au/pub/apache/hadoop/common</hadoopMirror>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -94,7 +96,7 @@
       <dependency>
         <groupId>com.fasterxml.woodstox</groupId>
         <artifactId>woodstox-core</artifactId>
-        <version>6.0.2</version>
+        <version>6.2.0</version>
       </dependency>
 
       <!-- Apache Spark -->
@@ -143,12 +145,7 @@
       <!-- Encoders -->
       <dependency>
         <groupId>au.csiro.pathling</groupId>
-        <artifactId>encoders-core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>au.csiro.pathling</groupId>
-        <artifactId>encoders-r4</artifactId>
+        <artifactId>encoders</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -161,27 +158,27 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.7.25</version>
+        <version>1.7.30</version>
       </dependency>
 
       <!-- Error monitoring -->
       <dependency>
         <groupId>io.sentry</groupId>
         <artifactId>sentry</artifactId>
-        <version>1.7.27</version>
+        <version>1.7.30</version>
       </dependency>
 
       <!-- Testing -->
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.12</version>
+        <version>4.13</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.9.1</version>
+        <version>3.15.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -193,13 +190,19 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>3.0.0</version>
+        <version>3.3.3</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.github.docker-java</groupId>
         <artifactId>docker-java</artifactId>
-        <version>3.1.1</version>
+        <version>${dockerJavaVersion}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.github.docker-java</groupId>
+        <artifactId>docker-java-transport-okhttp</artifactId>
+        <version>${dockerJavaVersion}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
@@ -230,7 +233,7 @@
           <configuration>
             <useSystemClassLoader>true</useSystemClassLoader>
             <useManifestOnlyJar>false</useManifestOnlyJar>
-            <argLine>-Xmx6g</argLine>
+            <argLine>-Xmx2g</argLine>
           </configuration>
         </plugin>
         <plugin>
@@ -241,17 +244,17 @@
         <plugin>
           <groupId>com.spotify</groupId>
           <artifactId>dockerfile-maven-plugin</artifactId>
-          <version>1.4.12</version>
+          <version>1.4.13</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.1</version>
+          <version>3.2.3</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>3.1.2</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -278,6 +281,11 @@
       </plugins>
     </pluginManagement>
   </build>
+  
+  <scm>
+    <developerConnection>scm:git:https://github.com/aehrc/pathling.git</developerConnection>
+    <tag>v1.1.2</tag>
+  </scm>
 
   <profiles>
     <profile>

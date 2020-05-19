@@ -16,6 +16,9 @@ forms are configured in the same way, through environment variables.
 
 - `PATHLING_HTTP_PORT` - (default: `8080`) The port which the server should bind
   to and listen for HTTP connections.
+- `PATHLING_HTTP_BASE` - (default: `""`) A prefix to add to the API endpoint, 
+  e.g. a value of `/foo` would cause the FHIR endpoint to be changed to 
+  `/foo/fhir`.
 - `PATHLING_VERBOSE_REQUEST_LOGGING` - (default: `false`) Setting this option to
   `true` will enable additional logging of the details of requests to the
   server, and between the server and the terminology service.
@@ -40,7 +43,7 @@ forms are configured in the same way, through environment variables.
 - `PATHLING_SPARK_MASTER_URL` - (default: `local[*]`) Address of the master node
   of an [Apache Spark](https://spark.apache.org/) cluster to use for processing
   data, see
-  [Master URLS](https://spark.apache.org/docs/latest/submitting-applications.html#master-urls).
+  [Master URLs](https://spark.apache.org/docs/latest/submitting-applications.html#master-urls).
 - `PATHLING_EXECUTOR_MEMORY` - (default: `1g`) The quantity of memory available
   for each child task to process data within, in the same format as JVM memory
   strings with a size unit suffix (`k`, `m`, `g` or `t`) (e.g. `512m`, `2g`).
@@ -78,7 +81,7 @@ forms are configured in the same way, through environment variables.
   `https://pathling.au.auth0.com/`.
 - `PATHLING_AUTH_AUDIENCE` - Configures the audience for bearer tokens, which is
   the FHIR endpoint that tokens are intended to be authorised for, e.g.
-  `https://server.pathling.app/fhir`.
+  `https://pathling.csiro.au/fhir`.
 - `PATHLING_AUTH_AUTHORIZE_URL` - Provides the URL which will be advertised as
   the [authorization endpoint](https://tools.ietf.org/html/rfc6749#section-3.1),
   e.g. `https://pathling.au.auth0.com/oauth/authorize`.
@@ -101,7 +104,7 @@ forms are configured in the same way, through environment variables.
 
 - `SENTRY_DSN` - If this variable is set, all errors will be reported to a
   [Sentry](https://sentry.io) service, e.g.
-  `https://abc123@sentry.io/123456?servername=server.pathling.app`.
+  `https://abc123@sentry.io/123456?servername=pathling.csiro.au`.
 
 ## Server base
 
@@ -124,7 +127,7 @@ Pathling can perform the role of a resource server within the
 [SMART App Launch Framework](https://hl7.org/fhir/smart-app-launch/index.html)
 is a profile of OAuth 2.0 which is specific to the access of health data.
 
-When authorisation is enabled through onfiguration, Pathling will refuse any
+When authorisation is enabled through configuration, Pathling will refuse any
 requests which are not accompanied by a valid
 [bearer token](https://tools.ietf.org/html/rfc6750). Tokens must meet the
 following requirements:
@@ -152,7 +155,7 @@ vs individual record data, and more.
 Pathling can also be run directly within an Apache Spark cluster as a persistent
 application.
 
-For compatibility, Pathling runs Spark 2.4.4 (Scala 2.11), with Hadoop version
+For compatibility, Pathling runs Spark 2.4.5 (Scala 2.11), with Hadoop version
 2.7.7.
 
 Next: [Roadmap](./roadmap.html)
